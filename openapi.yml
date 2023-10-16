@@ -21,14 +21,14 @@ paths:
               required:
                 - tracking_number
                 - latest_tracking_status
-                - delivery_company
+                - shipment_company
               properties:
                 tracking_number:
                   type: string
                   description: tracking number
-                estimated_delivery_date:
+                estimated_shipping_date:
                   type: string
-                  description: order id
+                  description: 配送予定日
                 latest_tracking_status:
                   type: string
                   enum:
@@ -40,9 +40,9 @@ paths:
                     - 配送トラブル発生
                     - 保管期限超過によるお届け失敗
                   description: latest tracking status
-                delivery_company:
+                shipping_company:
                   type: string
-                  description: delivery company
+                  description: shipping company
                 logistics_centers:
                   type: array
                   items:
@@ -50,7 +50,7 @@ paths:
                       center:
                         type: object
                         properties:
-                          center_name: 
+                          center_name:
                             type: string
                             description: logistics center name
                           center_address:
@@ -69,6 +69,196 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:      
+                properties:
                   results:
                     type: string
+
+  /api/v1/tracking/order:
+    get:
+      operationId: getOrder
+      summary: Get Order
+      parameters:
+        - in: query
+          name: external_order_id
+          schema:
+            title: External Order Id
+            description: 外部システムにある注文のID
+            type: string
+          required: false
+          description: 外部システムにある注文のID
+        - in: query
+          name: tracking_number
+          schema:
+            title: Tracking Number
+            description: 配送追跡番号
+            type: string
+          required: false
+          description: 配送追跡番号
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+      description: 注文を取得する
+      tags:
+        - Tracking
+
+components:
+  schemas:
+    OrderResponse:
+      title: OrderResponse
+      type: object
+      properties:
+        external_order_id:
+          title: External Order Id
+          description: 外部システムにある注文のID
+          example: 12345
+          type: string
+        order_number:
+          title: Order Number
+          description: 注文番号
+          example: '#1010'
+          type: string
+        shipments:
+          title: Shipments
+          description: 配送追跡情報
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackingInfoResponse'
+      required:
+        - external_order_id
+        - order_number
+        - shipments
+
+    TrackingInfoResponse:
+      title: TrackingInfoResponse
+      type: object
+      properties:
+        estimated_shipping_date:
+          title: Estimated Shipment Date
+          description: 到着予定日
+          example: 10月20日
+          type: string
+        latest_tracking_status:
+          type: string
+          enum:
+            - 荷物受付け
+            - 配送中
+            - コンビニ受取可能
+            - お届け完了
+            - 不在通知
+            - 配送トラブル発生
+            - 保管期限超過によるお届け失敗
+          description: 最新の配送ステータス
+        tracking_number:
+          title: Tracking Number
+          description: 追跡番号
+          example: '12345678910'
+          type: string
+        shipment_company:
+          title: Shipment Company
+          description: 配送会社情報
+          allOf:
+            - $ref: '#/components/schemas/MasterShipmentCompany'
+        shipping_statuses:
+          title: Shipping Statuses
+          description: 追跡情報
+          type: array
+          items:
+            $ref: '#/components/schemas/PortalTrackingStatusResponse'
+        order_created_at:
+          title: Order Created At
+          description: 注文日時
+          type: string
+          format: date-time
+        line_items:
+          title: Line Items
+          description: 配送ごとの商品情報(中身は仮置き)
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineItem'
+      required:
+        - shipment_company
+        - shipping_statuses
+        - order_created_at
+        - line_items
+
+    MasterShipmentCompany:
+      title: MasterShipmentCompany
+      type: object
+      properties:
+        name:
+          title: Name
+          description: 配送会社名
+          enum:
+            - sagawa
+            - yamato
+            - japan post
+          type: string
+      required:
+        - name
+
+    PortalTrackingStatusResponse:
+      title: PortalTrackingStatusResponse
+      type: object
+      properties:
+        shipment_status:
+          title: Shipment Status
+          description: 配送ステータス
+          example: 荷物受付
+          type: string
+        area:
+          title: Area
+          description: 配送エリア
+          example: ~営業所
+          type: string
+        shipment_time:
+          title: Shipment Time
+          example: '2023-10-20 12:00:00'
+          type: string
+          format: date-time
+      required:
+        - shipment_status
+        - area
+        - shipment_time
+
+    OrderLineItem:
+      title: OrderLineItem
+      type: object
+      properties:
+        external_item_id:
+          title: External Item Id
+          description: 外部システムにある商品のID
+          type: string
+        sku:
+          title: Sku
+          description: SKU
+          type: string
+        product_name:
+          title: Product Name
+          description: 商品名
+          type: string
+        image_link:
+          title: Image Link
+          description: 商品画像
+          type: string
+      required:
+        - external_item_id
+        - sku
+        - product_name
+        - image_link
+
+    TrackingInfoSearchByName:
+      title: TrackingInfoSearchByName
+      type: object
+      properties:
+        external_order_id:
+          title: External Order Id
+          description: 外部システムにある注文のID
+          type: string
+        tracking_number:
+          title: Tracking Number
+          description: 配送追跡番号
+          type: string
