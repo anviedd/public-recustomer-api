@@ -75,25 +75,42 @@ paths:
 
   /api/v1/tracking/order:
     get:
-      operationId: getOrder
-      summary: Get Order
+      operationId: getOrderByTrackingNumber
+      summary: Get Order By Tracking Number
       parameters:
-        - in: query
-          name: external_order_id
-          schema:
-            title: External Order Id
-            description: 外部システムにある注文のID
-            type: string
-          required: false
-          description: 外部システムにある注文のID
         - in: query
           name: tracking_number
           schema:
             title: Tracking Number
             description: 配送追跡番号
             type: string
-          required: false
+          required: true
           description: 配送追跡番号
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+      description: 注文を取得する
+      tags:
+        - Tracking
+
+  /api/v1/tracking/order/{external_order_id}:
+    get:
+      operationId: getOrderByOrderId
+      summary: Get Order By Order Id
+      parameters:
+        - in: path
+          name: external_order_id
+          schema:
+            title: External Order Id
+            description: 外部システムにある注文のID
+            type: string
+          required: true
+          description: 外部システムにある注文のID
+
       responses:
         '200':
           description: OK
