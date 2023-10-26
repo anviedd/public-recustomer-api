@@ -8,9 +8,9 @@ servers:
 paths:
   /{your_endpoint}:
     post:
-      operationId: shipping_status_webhook
-      summary: Shipping Status Webhook
-      description: real-time notification for shipments tracking , providing updates on package status during transit
+      operationId: delivery_status_webhook
+      summary: Delivery Status Webhook
+      description: real-time notification for delivery tracking , providing updates on package status during transit
       tags:
         - "Webhook"
       requestBody:
@@ -21,12 +21,12 @@ paths:
               required:
                 - tracking_number
                 - latest_tracking_status
-                - shipment_company
+                - delivery_company
               properties:
                 tracking_number:
                   type: string
-                  description: tracking number
-                estimated_shipping_date:
+                  description: 追跡番号
+                estimated_delivery_date:
                   type: string
                   description: 配送予定日
                 latest_tracking_status:
@@ -39,29 +39,27 @@ paths:
                     - 不在通知
                     - 配送トラブル発生
                     - 保管期限超過によるお届け失敗
-                  description: latest tracking status
-                shipping_company:
+                  description: 最新の配送ステータス
+                delivery_company:
                   type: string
-                  description: shipping company
-                logistics_centers:
+                  description: 配送会社名
+                checkpoints:
                   type: array
                   items:
                     properties:
-                      center:
-                        type: object
-                        properties:
-                          center_name:
-                            type: string
-                            description: logistics center name
-                          center_address:
-                            type: string
-                            description: logistics center address
-                          updated_at:
-                            type: string
-                            description: arrived at the center
-                          status:
-                            type: string
-                            description: status name at the center
+                      checkpoint_name:
+                        type: string
+                        description: 営業所名
+                      checkpoint_address:
+                        type: string
+                        description: 営業所住所
+                      updated_at:
+                        type: string
+                        description: 到着日時
+                      delivery_status:
+                        title: Delivery Status
+                        type: string
+                        description: ステータス名
       responses:
         '200':
           description: OK
@@ -138,8 +136,8 @@ components:
           description: 注文番号
           example: '#1010'
           type: string
-        shipments:
-          title: Shipments
+        deliveries:
+          title: Delivery
           description: 配送追跡情報
           type: array
           items:
@@ -147,14 +145,14 @@ components:
       required:
         - external_order_id
         - order_number
-        - shipments
+        - deliveries
 
     TrackingInfoResponse:
       title: TrackingInfoResponse
       type: object
       properties:
-        estimated_shipping_date:
-          title: Estimated Shipment Date
+        estimated_delivery_date:
+          title: Estimated Delivery Date
           description: 到着予定日
           example: 10月20日
           type: string
@@ -174,13 +172,13 @@ components:
           description: 追跡番号
           example: '12345678910'
           type: string
-        shipment_company:
-          title: Shipment Company
+        delivery_company:
+          title: Delivery Company
           description: 配送会社情報
           allOf:
-            - $ref: '#/components/schemas/MasterShipmentCompany'
-        shipping_statuses:
-          title: Shipping Statuses
+            - $ref: '#/components/schemas/MasterDeliveryCompany'
+        checkpoints:
+          title: Checkpoints
           description: 追跡情報
           type: array
           items:
@@ -197,13 +195,13 @@ components:
           items:
             $ref: '#/components/schemas/OrderLineItem'
       required:
-        - shipment_company
-        - shipping_statuses
+        - delivery_company
+        - checkpoints
         - order_created_at
         - line_items
 
-    MasterShipmentCompany:
-      title: MasterShipmentCompany
+    MasterDeliveryCompany:
+      title: MasterDeliveryCompany
       type: object
       properties:
         name:
@@ -221,25 +219,24 @@ components:
       title: PortalTrackingStatusResponse
       type: object
       properties:
-        shipment_status:
-          title: Shipment Status
+        delivery_status:
+          title: Delivery Status
           description: 配送ステータス
           example: 荷物受付
           type: string
-        area:
-          title: Area
-          description: 配送エリア
-          example: ~営業所
+        checkpoint_name:
           type: string
-        shipment_time:
-          title: Shipment Time
+          description: 営業所名
+          example: ~営業所
+        checkpoint_address:
+          type: string
+          description: 営業所
+          example: tokyo~
+        updated_at:
+          title: Updated At
           example: '2023-10-20 12:00:00'
           type: string
           format: date-time
-      required:
-        - shipment_status
-        - area
-        - shipment_time
 
     OrderLineItem:
       title: OrderLineItem
