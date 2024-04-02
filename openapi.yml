@@ -6,7 +6,7 @@ info:
 servers:
   - url: https://{your_server}/{your_endpoint}
 paths:
-  /{your_endpoint}:
+  /{your_shipping_endpoint}:
     post:
       operationId: shipping_status_webhook
       summary: Shipping Status Webhook
@@ -72,3 +72,642 @@ paths:
                 properties:      
                   results:
                     type: string
+
+  /{your_return_order_endpoint}:
+    post:
+      operationId: return_order_webhook
+      summary: Return Order Webhook
+      description: real-time notification for return order, providing updates on return order status
+      tags:
+        - "Webhook"
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnOrderWebhook'
+        required: true
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:      
+                  results:
+                    type: string
+
+components:
+  schemas:
+    ReturnOrderItemResultWebhook:
+      title: ReturnOrderItemResultWebhook
+      type: object
+      properties:
+        id:
+          title: Id
+          description: 返品商品の結果ID
+          example: 1
+          type: integer
+        approval_status:
+          title: Approval Status
+          description: 返品商品承認ステータス
+          example: unapproved
+          enum:
+            - unapproved
+            - manually_approved
+            - automatically_approved
+            - manually_rejected
+            - automatically_rejected
+            - deleted
+          type: string
+        send_back_status:
+          title: Send Back Status
+          description: 返品商品返送ステータス
+          example: unarrived
+          enum:
+            - unarrived
+            - accepted
+            - refused
+            - unnecessary
+            - expired
+          type: string
+        reshipment_status:
+          title: Reshipment Status
+          description: 返品商品再返送ステータス
+          example: unreshiped
+          enum:
+            - unreshiped
+            - reshiped
+          type: string
+        resolution_method:
+          title: Resolution Method
+          description: 返品商品対応方法
+          example: exchange
+          enum:
+            - exchange
+            - refund
+            - repair
+          type: string
+        item_status:
+          title: Item Status
+          description: 返品商品検品結果
+          example: A品
+          type: string
+        is_required_send_back:
+          title: Is Required Send Back
+          description: 返送が必要かどうか
+          example: true
+          type: boolean
+        is_customer_pay:
+          title: Is Customer Pay
+          description: 返送料負担がカスタマー負担かどうか
+          example: true
+          type: boolean
+        approval_reject_reason:
+          title: Approval Reject Reason
+          description: 承認拒否理由
+          example: 承認条件を満たしてない
+          type: string
+        exchange_reject_reason:
+          title: Exchange Reject Reason
+          description: 交換拒否理由
+          example: 交換条件を満たしてない
+          type: string
+        memo:
+          title: Memo
+          description: メモ
+          example: 在庫処分
+          type: string
+        send_back_reject_reason:
+          title: Send Back Reject Reason
+          description: 返送拒否理由
+          example: リクエスト内容と異なる
+          type: string
+        arrival_date:
+          title: Arrival Date
+          description: 返送到着日
+          example: '2024-01-17'
+          type: string
+          format: date
+      required:
+        - id
+        - is_required_send_back
+        - is_customer_burden
+    ReturnOrderItemOptionWebhook:
+      title: ReturnOrderItemOptionWebhook
+      type: object
+      properties:
+        key:
+          title: Key
+          description: 返品商品オプションキー
+          example: color
+          type: string
+        value:
+          title: Value
+          description: 返品商品オプション値
+          example: black
+          type: string
+      required:
+        - key
+        - value
+    ReturnExchangeItemWebhook:
+      title: ReturnExchangeItemWebhook
+      type: object
+      properties:
+        id:
+          title: Id
+          description: 交換商品ID
+          example: 1
+          type: integer
+        item_name:
+          title: Item Name
+          description: 交換商品名
+          example: exchange item A
+          type: string
+        options:
+          title: Options
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnOrderItemOptionWebhook'
+        image_link:
+          title: Image Link
+          description: 交換商品画像
+          example: https://~
+          type: string
+        sku:
+          title: Sku
+          description: 交換商品SKU
+          example: sku123
+          type: string
+        item_price:
+          title: Item Price
+          description: 交換商品金額
+          example: 5000
+          type: number
+        currency:
+          title: Currency
+          description: 通過
+          example: JPY
+          type: string
+        exchange_status:
+          title: Exchange Status
+          description: 交換ステータス
+          example: unexchanged
+          enum:
+            - unexchanged
+            - exchanged
+            - rejected
+          type: string
+        exchange_slip_creation_status:
+          title: Exchange Slip Creation Status
+          description: 交換伝票発行ステータス
+          example: uncreated
+          enum:
+            - uncreated
+            - created
+          type: string
+        external_order_code:
+          title: External Order Code
+          description: 外部交換伝票コード
+          example: order123
+          type: string
+      required:
+        - id
+        - item_name
+        - sku
+        - item_price
+        - currency
+    ReturnOrderItemWebhook:
+      title: ReturnOrderItemWebhook
+      type: object
+      properties:
+        id:
+          title: Id
+          description: 返品アイテムID
+          example: 1
+          type: integer
+        sku:
+          title: Sku
+          description: 返品アイテムSKU
+          example: sku123
+          type: string
+        product_id:
+          title: Product Id
+          description: 返品商品ID
+          example: product1234
+          type: string
+        image_link:
+          title: Image Link
+          description: 返品商品画像
+          example: https://~
+          type: string
+        is_deleted:
+          title: Is Deleted
+          description: 返品商品が削除されたかどうか
+          example: false
+          type: boolean
+        item_name:
+          title: Item Name
+          description: 返品商品名
+          example: return item A
+          type: string
+        item_price:
+          title: Item Price
+          description: 返品商品金額
+          example: 5000
+          type: number
+        currency:
+          title: Currency
+          description: 通過
+          example: JPY
+          type: string
+        item_result:
+          $ref: '#/components/schemas/ReturnOrderItemResultWebhook'
+        options:
+          title: Options
+          default: []
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnOrderItemOptionWebhook'
+        exchange_item:
+          $ref: '#/components/schemas/ReturnExchangeItemWebhook'
+      required:
+        - id
+        - sku
+        - product_id
+        - is_deleted
+        - item_name
+        - item_price
+        - currency
+        - item_result
+    CustomerWebhook:
+      title: CustomerWebhook
+      type: object
+      properties:
+        id:
+          title: Id
+          description: 顧客ID
+          example: 1
+          type: integer
+        email:
+          title: Email
+          description: メールアドレス
+          example: info@recustomer.co
+          type: string
+        return_count:
+          title: Return Count
+          description: 返品回数
+          example: 2
+          type: integer
+        cancel_count:
+          title: Cancel Count
+          description: キャンセル回数
+          example: 2
+          type: integer
+        last_name:
+          title: Last Name
+          description: 苗字
+          example: 山田
+          type: string
+        first_name:
+          title: First Name
+          description: 名前
+          example: 太郎
+          type: string
+        full_name:
+          title: Full Name
+          description: フルネーム
+          example: 山田太郎
+          type: string
+        phone_number:
+          title: Phone Number
+          description: 電話番号
+          example: '08011112222'
+          type: string
+        is_consent_email_marketing:
+          title: Is Consent Email Marketing
+          description: マーケティングメールの可否
+          example: true
+          type: boolean
+        is_consent_sms_marketing:
+          title: Is Consent Sms Marketing
+          description: マーケティングSMSの可否
+          example: true
+          type: boolean
+      required:
+        - id
+        - email
+        - return_count
+        - cancel_count
+        - last_name
+        - first_name
+        - full_name
+        - phone_number
+        - is_consent_email_marketing
+        - is_consent_sms_marketing
+    AddressWebhook:
+      title: AddressWebhook
+      type: object
+      properties:
+        last_name:
+          title: Last Name
+          description: 苗字
+          example: 山田
+          type: string
+        first_name:
+          title: First Name
+          description: 名前
+          example: 太郎
+          type: string
+        full_name:
+          title: Full Name
+          description: フルネーム
+          example: 山田太郎
+          type: string
+        phone_number:
+          title: Phone Number
+          description: 電話番号
+          example: '09012345678'
+          type: string
+        country_code:
+          title: Country Code
+          description: 国コード
+          example: JP
+          type: string
+        postal_code:
+          title: Postal Code
+          description: 郵便番号
+          example: 100-0024
+          type: string
+        province:
+          title: Province
+          description: 都道府県
+          example: 東京都
+          type: string
+        city:
+          title: City
+          description: 市区町村
+          example: 千代田区
+          type: string
+        address1:
+          title: Address1
+          description: 住所1（町名・番地など）
+          example: 千代田1-1-1
+          type: string
+        address2:
+          title: Address2
+          description: 住所2（建物名・部屋番号など）
+          example: 千代田ビル501
+          type: string
+      required:
+        - last_name
+        - first_name
+        - full_name
+        - phone_number
+        - country_code
+        - postal_code
+        - province
+        - city
+        - address1
+        - address2
+    ReturnRefundDiscountAndExpensesWebhook:
+      title: ReturnRefundDiscountAndExpensesWebhook
+      type: object
+      properties:
+        id:
+          title: Id
+          type: integer
+        suggested_amount:
+          title: Suggested Amount
+          type: number
+        fixed_amount:
+          title: Fixed Amount
+          type: number
+        discount_expenses_name:
+          title: Discount Expenses Name
+          description: 割引・費用名の設定名称
+          example: 返品手数料
+          type: string
+      required:
+        - id
+        - discount_expenses_name
+    RefundInfoWebhook:
+      title: RefundInfoWebhook
+      type: object
+      properties:
+        id:
+          title: Id
+          description: 返金情報ID
+          example: 1
+          type: integer
+        payment_method:
+          title: Payment Method
+          description: 決済方法
+          example: クレジットカード
+          type: string
+        refund_method:
+          title: Refund Method
+          description: 返金
+          example: API返金
+          enum:
+            - API返金
+            - PSP画面
+            - 銀行振込
+          type: string
+        refund_sub_total:
+          title: Refund Sub Total
+          description: 返金小計
+          example: 10000
+          type: number
+        tax:
+          title: Tax
+          description: 税
+          example: 1000
+          type: number
+        suggested_amount:
+          title: Suggested Amount
+          description: 返金提案金額
+          example: 11000
+          type: number
+        fixed_amount:
+          title: Fixed Amount
+          description: 返金した金額
+          example: 11000
+          type: number
+        discount_and_expenses:
+          title: Discount And Expenses
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnRefundDiscountAndExpensesWebhook'
+      required:
+        - id
+        - refund_sub_total
+        - tax
+        - suggested_amount
+        - discount_and_expenses
+
+    ReturnOrderWebhook:
+      title: ReturnOrderWebhook
+      type: object
+      properties:
+        id:
+          title: Id
+          description: Return OrderのID
+          example: 1
+          type: integer
+        order_number:
+          title: Order Number
+          description: 注文番号
+          example: '#1001'
+          type: string
+        request_id:
+          title: Request Id
+          description: リクエストのID
+          example: '#1001_01'
+          type: string
+        created_at:
+          title: Created At
+          description: 返品作成日時
+          example: '2024-01-17 20:13:41.103117+00'
+          type: string
+          format: date-time
+        refund_reject_reason:
+          title: Refund Reject Reason
+          description: 返金拒否理由
+          example: '2024-01-17 20:13:41.103117+00'
+          type: string
+        approval_at:
+          title: Approval At
+          description: 返品承認日時
+          example: '2024-01-17 20:13:41.103117+00'
+          type: string
+          format: date-time
+        send_backed_at:
+          title: Send Backed At
+          description: 返送日時
+          example: '2024-01-17 20:13:41.103117+00'
+          type: string
+          format: date-time
+        reshipmented_at:
+          title: Reshipmented At
+          description: 再返送日時
+          example: '2024-01-17 20:13:41.103117+00'
+          type: string
+          format: date-time
+        exchanged_at:
+          title: Exchanged At
+          description: 交換日時
+          example: '2024-01-17 20:13:41.103117+00'
+          type: string
+          format: date-time
+        refunded_at:
+          title: Refunded At
+          description: 返金日時
+          example: '2024-01-17 20:13:41.103117+00'
+          type: string
+          format: date-time
+        completed_at:
+          title: Completed At
+          description: リクエスト完了日時
+          example: '2024-01-17 20:13:41.103117+00'
+          type: string
+          format: date-time
+        approval_status:
+          title: Approval Status
+          description: 承認ステータス
+          example: unapproved
+          enum:
+            - unapproved
+            - partially_unapproved
+            - approved
+            - partially_approved
+            - rejected
+            - deleted
+          type: string
+        send_back_status:
+          title: Send Back Status
+          description: 返送ステータス
+          example: unarrived
+          enum:
+            - unarrived
+            - partially_unarrived
+            - accepted
+            - partially_accepted
+            - refused
+            - unnecessary
+            - expired
+          type: string
+        reshipment_status:
+          title: Reshipment Status
+          description: 再返送ステータス
+          example: unreshiped
+          enum:
+            - unreshiped
+            - partially_unreshiped
+            - reshiped
+          type: string
+        exchange_status:
+          title: Exchange Status
+          description: 交換ステータス
+          example: unexchanged
+          enum:
+            - unexchanged
+            - partially_unexchanged
+            - exchanged
+            - partially_exchanged
+            - rejected
+          type: string
+        refund_status:
+          title: Refund Status
+          description: 返金ステータス
+          example: unrefunded
+          enum:
+            - unrefunded
+            - processing
+            - refunded
+            - rejected
+          type: string
+        payment_status:
+          title: Payment Status
+          description: 決済ステータス
+          example: unpaid
+          enum:
+            - unpaid
+            - processing
+            - paid
+          type: string
+        exchange_slip_creation_status:
+          title: Exchange Slip Creation Status
+          description: 交換伝票発行ステータス
+          example: uncreated
+          enum:
+            - uncreated
+            - partiallycreated
+            - created
+          type: string
+        order_items:
+          title: Order Items
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnOrderItemWebhook'
+        customer:
+          $ref: '#/components/schemas/CustomerWebhook'
+        shipping_address:
+          $ref: '#/components/schemas/AddressWebhook'
+        billing_address:
+          $ref: '#/components/schemas/AddressWebhook'
+        refund_info:
+          $ref: '#/components/schemas/RefundInfoWebhook'
+        is_archive:
+          title: Is Archive
+          type: boolean
+      required:
+        - id
+        - order_number
+        - request_id
+        - created_at
+        - order_items
+        - customer
+        - is_archive
