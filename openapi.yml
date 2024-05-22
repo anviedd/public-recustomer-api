@@ -81,6 +81,15 @@ paths:
       tags:
         - "Webhook"
 
+      parameters:
+        - in: header
+          name: X-Recustomer-Signature-256
+          schema:
+            type: string
+            pattern: '^sha256=[a-fA-F0-9]{64}$'
+          required: true
+          description: "HMAC SHA256 signature of the payload, provided in the header to ensure data integrity and authentication of the source. The signature should match the format 'sha256=&lt;signature&gt;', where &lt;signature&gt; is a 64-character hexadecimal string."
+
       requestBody:
         content:
           application/json:
