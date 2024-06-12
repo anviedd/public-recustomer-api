@@ -22,6 +22,13 @@ paths:
             pattern: '^sha256=[a-fA-F0-9]{64}$'
           required: true
           description: "HMAC SHA256 signature of the payload, provided in the header to ensure data integrity and authentication of the source. The signature should match the format 'sha256=&lt;signature&gt;', where &lt;signature&gt; is a 64-character hexadecimal string."
+        - in: header
+          name: X-Recustomer-Sender-ID
+          required: true
+          schema:
+            type: string
+            example: '1bad6b8cf97131fceab8543e81f7757195fbb1d36b376ee994ad1cf17699c464'
+          description: This header contains the unique identifier of the organization that triggered the webhook, allowing the recipient identify the source of the webhook.
 
       requestBody:
         content:
@@ -99,6 +106,13 @@ paths:
             pattern: '^sha256=[a-fA-F0-9]{64}$'
           required: true
           description: "HMAC SHA256 signature of the payload, provided in the header to ensure data integrity and authentication of the source. The signature should match the format 'sha256=&lt;signature&gt;', where &lt;signature&gt; is a 64-character hexadecimal string."
+        - in: header
+          name: X-Recustomer-Sender-ID
+          required: true
+          schema:
+            type: string
+            example: '1bad6b8cf97131fceab8543e81f7757195fbb1d36b376ee994ad1cf17699c464'
+          description: This header contains the unique identifier of the organization that triggered the webhook, allowing the recipient identify the source of the webhook.
 
       requestBody:
         content:
