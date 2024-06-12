@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Recustomer API
   description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
-  version: 0.1.9
+  version: 0.1.10
 servers:
   - url: https://{your_server}/{your_endpoint}
 paths:
