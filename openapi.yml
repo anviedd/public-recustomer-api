@@ -86,7 +86,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:      
+                properties:
                   results:
                     type: string
 
@@ -321,6 +321,11 @@ components:
           description: 返品アイテムID
           example: 1
           type: integer
+        original_item_id:
+          title: Original Item Id
+          description: 元のitem ID
+          example: A11
+          type: string
         sku:
           title: Sku
           description: 返品アイテムSKU
@@ -368,6 +373,7 @@ components:
           $ref: '#/components/schemas/ReturnExchangeItemWebhook'
       required:
         - id
+        - original_item_id
         - sku
         - product_id
         - is_deleted
