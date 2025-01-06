@@ -7,12 +7,9 @@ docker-compose up -d
 ```
 
 2. access these link!
+swagger-ui : http://localhost:3035
 
-prism : http://localhost:3030
-
-swagger-ui : http://localhost:3031
-
-redoc : http://localhost:3032
+redoc : http://localhost:3036
 
 ## Devcontainer
 DevContainerに接続することで、openapi向けvscode拡張機能を使うことができます
