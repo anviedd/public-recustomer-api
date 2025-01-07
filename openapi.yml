@@ -51,11 +51,11 @@ paths:
                   enum:
                     - 荷物受付け
                     - 配送中
-                    - コンビニ受取可能
                     - お届け完了
-                    - 不在通知
-                    - 配送トラブル発生
-                    - 保管期限超過によるお届け失敗
+                    - 荷物受取可能
+                    - ご不在のため持ち戻り
+                    - 配送トラブル
+                    - 保管期限の超過
                   description: latest tracking status
                 delivery_company:
                   type: string
@@ -67,7 +67,7 @@ paths:
                       center:
                         type: object
                         properties:
-                          center_name: 
+                          center_name:
                             type: string
                             description: logistics center name
                           center_address:
